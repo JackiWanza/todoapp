@@ -10,7 +10,7 @@ const TodosList = () => {
         {
          todos.map(todo => (
              <li key={todo} className="list-group-item">
-              <Link to={`/todos/${todo}`}>
+              <Link to={`/todos/${todo}`} state={todo}>
                 {todo}
               </Link>
              </li>
