@@ -7,6 +7,8 @@ export const TodoDetails = () => {
   // console.log(state)
   const [todo, setTodo] = useState(null)
   const [isLoading, setisLoading] = useState(false)
+  const [title, setTitle] = useState('')
+  const [body, setBody] = useState('')
 
   const {todoId}=useParams()
   const navigate=useNavigate()
@@ -20,7 +22,25 @@ export const TodoDetails = () => {
     }).finally(()=>setisLoading(false))
   }
 
-  const handleEdit =()=>{
+  const handleEdit =(event)=>{
+    event.preventDefault()
+    setisLoading(true)
+    fetch(`https://jsonplaceholder.typicode.com/posts/${todoId}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        id: todoId,
+        title: title,
+        body: body,
+        userId: 1,
+      }),
+      headers: {
+        'Content-type': 'application/json; charset=UTF-8',
+      },
+    })
+      .then((response) => response.json())
+      .then((json) => console.log(json))
+      .finally(()=>setisLoading(false));
+    // console.log("first")
 
   }
 
@@ -35,19 +55,29 @@ export const TodoDetails = () => {
       
     }
   }, [todoId])
+
+  useEffect(() => {
+    if (todo) {
+     setTitle(todo.title)
+     setBody(todo.body) 
+    }
+  }, [todo])
+  
   return (
     todo ? 
     (
       <div className='container'>
         <div className="row">
-          <div className="column">
-            <button type="button" className="btn btn-outline-danger mr-4" onClick={handleDelete} disabled={isLoading}>Delete Todo</button>
-            <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+          <div className="col mt-4">
+            <button type="button" className="btn btn-outline-danger me-4" onClick={handleDelete} disabled={isLoading}>Delete Todo</button>
+            <button type="button" className="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
              Edit Todo
             </button>
           
         </div>
-        <h1>{todo.title}</h1>
+        <div className="card mt-4 p-4"> 
+          <h1>{todo.title}</h1>
+        </div>
         <div className="modal fade" id="exampleModal" tabIndex={-1} aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div className="modal-dialog">
             <div className="modal-content">
@@ -56,11 +86,33 @@ export const TodoDetails = () => {
                 <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div className="modal-body">
-                ...
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" className="btn btn-primary" onClick={handleEdit}>Save changes</button>
+                <div className='container mt-3'>
+                  <form onSubmit={handleEdit}>
+                      <div className="mb-3">
+                          <label htmlFor="exampleInputTitle" className="form-label">Title</label>
+                          <input type="text" className="form-control" id="exampleInputTitle" value={title} onChange={(event)=>{
+                              console.log(event.target.value)
+                              setTitle(event.target.value)
+                          }}/>
+                      </div>
+                      <div className="mb-3">
+                          <label htmlFor="exampleInputBody" className="form-label">Body</label>
+                          <input type="text" className="form-control" id="exampleInputBody" value={body} onChange={(event)=>{
+                              console.log(event.target.value)
+                              setBody(event.target.value)
+                          }}/>
+                      </div>
+                      <button type="submit" className="btn btn-primary">
+                          {
+                              isLoading ?(
+                                  <div className="spinner-border text-info" role="status">
+                                      <span className="visually-hidden">Loading...</span>
+                                  </div>
+                              ):('Update Todo')
+                          }
+                      </button>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
